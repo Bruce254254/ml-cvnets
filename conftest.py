@@ -1,42 +1,29 @@
-#
-# For licensing see accompanying LICENSE file.
-# Copyright (C) 2023 Apple Inc. All Rights Reserved.
-#
-
+# conftest.py
+# Pytest fixtures / env helpers for project (dataset path, quick sample loader)
 import os
-import signal
-from types import FrameType
-from typing import Optional
-
 import pytest
+from pathlib import Path
 
-session_timed_out = False
+DEFAULT_DATA_ROOT = os.environ.get("MALARIA_DATA_ROOT", "data/cell_images")
 
+@pytest.fixture(scope="session")
+def data_root():
+    """Return the dataset root path used by tests and quick scripts."""
+    root = Path(DEFAULT_DATA_ROOT)
+    if not root.exists():
+        pytest.skip(f"Dataset root '{root}' does not exist. Set MALARIA_DATA_ROOT or create the folder.")
+    return root
 
-def handle_timeout(signum: int, frame: Optional[FrameType] = None) -> None:
-    global session_timed_out
-    session_timed_out = True
-    # Call fail() to capture the output of the test.
-    pytest.fail("timeout")
+@pytest.fixture(scope="session")
+def sample_image_path(data_root):
+    """Return a single sample image path for smoke tests."""
+    parasitized = list((data_root / "Parasitized").glob("*"))
+    uninfected = list((data_root / "Uninfected").glob("*"))
+    sample = (parasitized + uninfected)
+    if not sample:
+        pytest.skip("No images found in dataset folders.")
+    return sample[0]
 
-
-def pytest_sessionstart():
-    timeout = os.environ.get("PYTEST_GLOBAL_TIMEOUT", "")
-    if not timeout:
-        return
-    if timeout.endswith("s"):
-        timeout = int(timeout[:-1])
-    elif timeout.endswith("m"):
-        timeout = int(timeout[:-1]) * 60
-    else:
-        raise ValueError(
-            f"Timeout value {timeout} should either end with 'm' (minutes) or 's' (seconds)."
-        )
-
-    signal.signal(signal.SIGALRM, handle_timeout)
-    signal.setitimer(signal.ITIMER_REAL, timeout)
-
-
-def pytest_runtest_logfinish(nodeid, location):
-    if session_timed_out:
-        pytest.exit("timeout")
+def pytest_addoption(parser):
+    parser.addoption("--data-root", action="store", default=DEFAULT_DATA_ROOT,
+                     help="Path to malaria dataset root containing Parasitized/ and Uninfected/ subfolders")
