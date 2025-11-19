@@ -1,9 +1,8 @@
-# CVNets: A library for training computer vision networks
+Enhanced MobileViT for Medical Image Classification (Adapted Using CVNets Library)
 
-CVNets is a computer vision toolkit that allows researchers and engineers to train standard and novel mobile- 
-and non-mobile computer vision models for variety of tasks, including object classification, object detection,
-semantic segmentation, and foundation models (e.g., CLIP).
+This project adapts the CVNets computer vision toolkit to train an enhanced version of the MobileViT architecture specifically for medical image classification. While CVNets is a powerful library designed for training both mobile and non-mobile vision models across tasks such as image classification, detection, segmentation, and foundation models (e.g., CLIP), our work customizes it for disease detection using the NIH Malaria Cell Images Dataset.
 
+By integrating the MobileViT framework with domain-specific enhancements—including medical-appropriate data augmentation, multi-scale feature fusion, and attention mechanisms (CBAM)—this project demonstrates how CVNets can be extended beyond general-purpose datasets (e.g., ImageNet) to support high-impact medical imaging applications. The updated system enables efficient and accurate classification suitable for use in clinical settings and on resource-constrained devices.
 ## Table of contents
 
    * [What's new?](#whats-new)
